@@ -61,7 +61,7 @@
   "Return a list of numeric vectors like [1 1] [1 2] .. [a b]"
   (for [x (range 1 (inc a)), y (range 1 (inc b))] [x y]))
 
-;; (last (sort (filter #(palindrom? (str %)) (map #(* (get % 0) (get % 1)) (numVec 999 999)))))
+;; (last (sort (filter #(palindrom? (str %)) (map #(* (% 0) (% 1)) (numVec 999 999)))))
 ;; 906609
 
 ;;
@@ -120,10 +120,10 @@
 ;; ---------- Euler 9 -------------
 ;;
 ;; (let [v (first (filter 
-;;		#(let [a (get % 0), b (get % 1), c (- 1000 a b)]
+;;		#(let [a (% 0), b (% 1), c (- 1000 a b)]
 ;;		   (= (+ (expt a 2) (expt b 2)) (expt c 2)))
 ;;		(for [a (range 1 333) b (range 1 500)] [a b])))]
-;;  (let [a (get v 0), b (get v 1), c (- 1000 a b)]
+;;  (let [a (v 0), b (v 1), c (- 1000 a b)]
 ;;    (* a b c)))
 ;; 31875000
 
@@ -208,3 +208,103 @@
 ;;
 ;; (take-last 10 (digits (sum-vec (map #(expt % %) (range 1 1000)))))
 ;; (\9 \1 \1 \0 \8 \4 \6 \7 \0 \0)
+
+;;
+;; ---------- Euler 18 -------------
+;;
+(def small-triangle [
+[3]
+[7 4]
+[2 4 6]
+[8 5 9 3]])
+
+(def triangle  [
+[75]
+[95 64]
+[17 47 82]
+[18 35 87 10]
+[20  4 82 47 65]
+[19  1 23 75  3 34]
+[88  2 77 73  7 63 67]
+[99 65  4 28  6 16 70 92]
+[41 41 26 56 83 40 80 70 33]
+[41 48 72 33 47 32 37 16 94 29]
+[53 71 44 65 25 43 91 52 97 51 14]
+[70 11 33 28 77 73 17 78 39 68 17 57]
+[91 71 52 38 17 14 91 43 58 50 27 29 48]
+[63 66  4 68 89 53 67 30 73 16 69 87 40 31]
+[ 4 62 98 27 23  9 70 98 73 93 38 53 60 4 23]])
+
+(defn anc-sum [triangle j n]
+  (let [v (nth (nth triangle j []) n 0)
+	row (nth triangle (inc j) [])]
+    (if (empty? row)
+      v
+      (+ v (max (anc-sum triangle (inc j) n)
+		(anc-sum triangle (inc j) (dec n)))))))
+
+(defn max-sum-triangle [triangle]
+	(when triangle
+	  (let [rev (reverse triangle)
+		size (count triangle)]
+	    (->> (range 0 size)
+		 (map #(anc-sum rev 0 %))
+		 (reduce max)))))
+
+;; (mem-max-sum-triangle triangle)
+;; 1074
+
+;; Memoized version!
+
+(declare mem-anc-sum)
+(defn anc-sum2 [triangle j n]
+  (let [v (nth (nth triangle j []) n 0)
+	row (nth triangle (inc j) [])]
+    (if (empty? row)
+      v
+      (+ v (max (mem-anc-sum triangle (inc j) n)
+		(mem-anc-sum triangle (inc j) (dec n)))))))
+
+(def mem-anc-sum (memoize anc-sum2))
+
+(defn mem-max-sum-triangle [triangle]
+	(when triangle
+	  (let [rev (reverse triangle)
+		size (count triangle)]
+	    (->> (range 0 size)
+		 (map #(mem-anc-sum rev 0 %))
+		 (reduce max)))))
+
+;; Comparison
+
+;; user> (dotimes [i 5]
+;; 	 (time (max-sum-triangle triangle)))
+;; "Elapsed time: 709.331294 msecs"
+;; "Elapsed time: 740.759319 msecs"
+;; "Elapsed time: 740.058476 msecs"
+;; "Elapsed time: 741.694414 msecs"
+;; "Elapsed time: 713.760037 msecs"
+
+;; user> (dotimes [i 5]
+;;	 (time (mem-max-sum-triangle triangle)))
+;; "Elapsed time: 1.760809 msecs"
+;; "Elapsed time: 0.18123 msecs"
+;; "Elapsed time: 0.09466 msecs"
+;; "Elapsed time: 0.088514 msecs"
+;; "Elapsed time: 0.093967 msecs"
+
+;;
+;; ---------- Euler 67 -------------
+;;
+(use 'clojure.contrib.duck-streams)
+(use 'clojure.contrib.str-utils)
+
+(defn str-seq-to-num-seq [s]
+  (->> s
+       (re-split #" ")
+       (map str-to-num)))
+
+(def big-triangle (map str-seq-to-num-seq (read-lines "triangle.txt")))
+
+;;(mem-max-sum-triangle big-triangle)
+;; 7273
