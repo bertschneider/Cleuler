@@ -14,7 +14,6 @@
 ;; Command:
 ;; (reduce + (filter #(divideableByAny? % [3 5]) (range 3 1000)))
 
-
 ;;
 ;; ---------- Euler 2 -------------
 ;;
@@ -218,13 +217,6 @@
 
 
 ;;
-;; ---------- Euler 48 -------------
-;;
-;; Command:
-;; (take-last 10 (digits (sum-vec (map #(expt % %) (range 1 1000)))))
-
-
-;;
 ;; ---------- Euler 18 -------------
 ;;
 (def small-triangle [
@@ -307,6 +299,36 @@
 ;; "Elapsed time: 0.09466 msecs"
 ;; "Elapsed time: 0.088514 msecs"
 ;; "Elapsed time: 0.093967 msecs"
+
+
+;;
+;; ---------- Euler 21 -------------
+;;
+(defn dividers [a]
+  (for [n (range 1 (inc (/ a 2))) :when (zero? (mod a n))]
+    n))
+
+(defn sum-dividers [a]
+  (sum-vec (dividers a)))
+
+(def mem-sum-dividers 
+     (memoize sum-dividers))
+
+(defn amicable? [a]
+  (let [b (mem-sum-dividers a)]
+    (and (not= a b) 
+	 (= a (mem-sum-dividers b)))))
+
+;; Command:
+;; (sum-vec (filter amicable? (range 1 10001)))
+
+
+;;
+;; ---------- Euler 48 -------------
+;;
+;; Command:
+;; (take-last 10 (digits (sum-vec (map #(expt % %) (range 1 1000)))))
+
 
 ;;
 ;; ---------- Euler 67 -------------
