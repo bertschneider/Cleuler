@@ -210,6 +210,28 @@
 
 
 ;;
+;; ---------- Euler 15 -------------
+;;
+(declare mem-cube-paths)
+
+(defn cube-paths [n j]
+  (if (or (< n 0) (< j 0))
+    0
+    (let [l (mem-cube-sum (dec n) j) 
+	  t (mem-cube-sum n (dec j))]
+      (cond (and (zero? l) (zero? t)) 1
+	    (zero? l) t
+	    (zero? t) l
+	    :else (+ l t)))))
+
+(def mem-cube-paths (memoize cube-sum))
+
+;; Command:
+;; (cube-paths 20 20)
+;; There is a much simpler solution using pascal's triangle
+
+
+;;
 ;; ---------- Euler 16 -------------
 ;;
 ;; Command:
@@ -302,6 +324,20 @@
 
 
 ;;
+;; ---------- Euler 20 -------------
+;;
+(declare fac)
+(defn factorial [a]
+  (if (= a 1)
+    1
+    (* a (fac (dec a)))))
+
+(def fac (memoize factorial))
+
+;; Command:
+;; (sum-vec (digits (fac 100)))
+
+;;
 ;; ---------- Euler 21 -------------
 ;;
 (defn dividers [a]
@@ -321,6 +357,19 @@
 
 ;; Command:
 ;; (sum-vec (filter amicable? (range 1 10001)))
+
+
+;;
+;; ---------- Euler 25 -------------
+;;
+(defn fibterm [nth fib]
+  (let [n (first fib)]
+    (if (= (count (digits n)) 1000)
+      nth
+      (recur (inc nth) (rest fib)))))
+
+;; Command:
+;; (fibterm 0 (fibo))
 
 
 ;;
